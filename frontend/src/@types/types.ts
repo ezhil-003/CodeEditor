@@ -6,6 +6,11 @@ export interface ComponentChildren {
   children?: React.ReactNode;
 }
 
+export interface ApiRequestOptions {
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+  data?: any;
+}
+
 export type Route = RouteObject;
 // type for route
 export type Routes = {

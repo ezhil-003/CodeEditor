@@ -1,5 +1,5 @@
 import { Suspense, useEffect } from "react";
-import { createBrowserRouter, RouterProvider } from "react-router";
+import { createBrowserRouter, Navigate, RouterProvider, useLocation } from "react-router";
 import {
   QueryClient,
   QueryClientProvider,
@@ -18,6 +18,9 @@ import { decryptRefreshToken } from './utils/encryption.ts';
 function App() {
   const queryClient = new QueryClient();
   const {token, refreshToken } = useAuth();
+  const location = useLocation();
+
+ 
   useEffect(() => {
     const recoverToken = async () => {
       if (!token) { 
@@ -28,7 +31,10 @@ function App() {
             const decryptedRefreshToken = await decryptRefreshToken(encryptedRefreshToken); 
 
             // 2. Make a request to the backend for a new access token
-          }   
+          } else {
+            // Redirect to the login page with the current location as the 'from' parameter
+            return <Navigate to="/signin" state={{ from: location }} replace />;
+          }  
         } catch (error) {
           // Handle decryption or network error 
           console.error('Token recovery error:', error); 
@@ -49,7 +55,7 @@ function App() {
       children: publicRoutes,
     },
     {
-      path: "/dashboard",
+      path: "/user",
       element: (
         <Suspense fallback={<Loading />}>
           <ProtectedRoutes>

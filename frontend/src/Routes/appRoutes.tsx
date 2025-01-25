@@ -37,11 +37,9 @@ export const UserRoutes = [
 
 
 
-export function ProtectedRoutes({ children }: { children: React.ReactNode }) {
+ export function ProtectedRoutes({ children }: { children: React.ReactNode }) {
     const { token } = useAuth();
-    const location = useLocation();
     if (!token) {
-        // Redirect to the login page with the current location as the 'from' parameter
         return <Navigate to="/signin" state={{ from: location }} replace />;
     }
     return children;

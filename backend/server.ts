@@ -9,8 +9,8 @@ const app = new Hono();
 
 //CORS middleware to the corsApp instance
 const protectedCors = cors({
-  origin: ['http://localhost:5173'], 
-  allowMethods: ['GET', 'PUT', 'DELETE', 'OPTIONS'], 
+  origin: ['http://localhost:5173/user'], 
+  allowMethods: ['GET', 'PUT', 'DELETE', 'OPTIONS','POST','PATCH'], 
   allowHeaders: ['Content-Type', 'Authorization'], 
   credentials: true,
 });
