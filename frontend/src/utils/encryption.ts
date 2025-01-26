@@ -52,7 +52,7 @@ export const encryptRefreshToken = async (refreshToken: any) => {
   return `${ivBase64}:${encryptedDataBase64}`;
 };
 
-export const decryptRefreshToken = async (encryptedData: string) => {
+export const decryptRefreshToken = async (encryptedData: any) => {
   // Extract the IV from the stored encrypted data
   const [ivBase64, encryptedDataBase64] = encryptedData.split(':');
   const iv = Buffer.from(ivBase64, 'base64');

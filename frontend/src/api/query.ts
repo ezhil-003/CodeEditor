@@ -33,7 +33,7 @@ export const useLoginMutation = (navigate: any) => {
     // Store tokens in localStorage (with encryption for refreshToken)
     localStorage.setItem("accessToken", token);
     localStorage.setItem("refreshToken", encrypted);
-    navigate("/dashboard", {
+    navigate("/user/dashboard", {
       state: { message: "Account Loggedin successfully!" },
     });
   };
@@ -50,7 +50,16 @@ export const useLoginMutation = (navigate: any) => {
 
 export const useRefreshTokenMutation = () => {
   const handleSuccess = async(data: any)=>{
-    
+    const { token, refreshToken } = data;
+    const { setToken, setRefreshToken } = useAuth();
+
+    setToken(token);
+    setRefreshToken(refreshToken);
+
+    const encrypted = await encryptRefreshToken(refreshToken)
+    // Store tokens in localStorage (with encryption for refreshToken)
+    localStorage.setItem("accessToken", token);
+    localStorage.setItem("refreshToken", encrypted);
   }
   return useMutation({
       mutationFn:refreshToken,

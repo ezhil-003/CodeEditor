@@ -1,86 +1,69 @@
-import React, { createContext, useEffect, use, useState } from 'react';
+import React, { createContext, useLayoutEffect, use, useState } from 'react';
 import { AuthenticationContextType } from '../@types/types';
-
-import { Navigate } from 'react-router';
 import { decryptRefreshToken } from '../utils/encryption';
+import { useRefreshTokenMutation } from '../api/query';
 
 export const AuthenticationContext = createContext<AuthenticationContextType | null>({
   token: null,
   setToken: () => { },
   refreshToken: null,
-  setRefreshToken: () => { }
+  setRefreshToken: () => { },
+  isLoading: false,
+  handleLogout: () => {},
+  isAuthenticated: false,
 });
-
-
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [token, setToken] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false); 
+
+  const { mutate: refreshTokenMutate } = useRefreshTokenMutation();
  
-
-  useEffect(() => {
-    const storedRefreshToken = localStorage.getItem('refreshToken');
-    if (storedRefreshToken) {
-      try {
-        const decryptedRefreshToken = decryptRefreshToken(storedRefreshToken);
-        setRefreshToken(decryptedRefreshToken);
-        // Attempt to fetch the access token using the refreshed token
-        refreshAccessToken();
-      } catch (error) {
-        console.error('Error decrypting refresh token:', error);
-        // Handle decryption error 
-      }
-    }
-  }, []);
-
   const refreshAccessToken = async () => {
-    if (!refreshToken) {
-      return;
-    }
-
-    setIsLoading(true);
-
+    if (!refreshToken) return;
     try {
-      const response = await fetch('/api/refresh', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ refreshToken }),
-      });
-
-      if (!response.ok) {
-        // Handle error (e.g., invalid refresh token, server error)
-        handleTokenRefreshError();
-        return;
-      }
-
-      const data = await response.json();
-      const newAccessToken = data.accessToken; 
-
-      setToken(newAccessToken);
-      localStorage.setItem('accessToken', newAccessToken); 
-      setIsLoading(false); 
-
+      refreshTokenMutate(refreshToken);
     } catch (error) {
-      handleTokenRefreshError(); 
+      console.error("Error refreshing access token:", error);
+      handleLogout(); // Logout on refresh token failure
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleTokenRefreshError = () => {
-    // Handle token refresh error (e.g., logout)
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
+  const handleLogout = () => {
     setToken(null);
     setRefreshToken(null);
-    setIsLoading(false); 
-    // router.push('/login'); 
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
   };
 
+  useLayoutEffect(() => {
+    const initializeAuth = async () => {
+      const storedRefreshToken = localStorage.getItem("refreshToken");
+      if (storedRefreshToken) {
+        try {
+          const decryptedToken = await decryptRefreshToken(storedRefreshToken); // Await the decryption
+          setRefreshToken(decryptedToken); // Set the decrypted token
+          await refreshAccessToken(); // Ensure the token refresh happens sequentially
+        } catch (error) {
+          console.error("Error decrypting refresh token:", error);
+          handleLogout(); // Handle logout on decryption or refresh failure
+        }
+      } else {
+        
+      }
+    };
+  
+    initializeAuth(); // Call the async function
+  }, []);
+
+  const isAuthenticated = !!token;
+
   return (
-    <AuthenticationContext value={{ token, setToken, refreshToken, setRefreshToken }}>
-      {children}
+    <AuthenticationContext value={{ token, setToken, refreshToken, setRefreshToken, isLoading, handleLogout, isAuthenticated }}>
+      {!isLoading && children}
     </AuthenticationContext>
   );
 }

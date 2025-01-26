@@ -1,5 +1,5 @@
-import axios, { AxiosInstance } from 'axios'
-import { SignupForm, ApiRequestOptions } from '../@types/types';
+import axios from 'axios'
+import { SignupForm } from '../@types/types';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL
 
@@ -7,43 +7,10 @@ const publicClient = axios.create({
     baseURL: BASE_URL || 'http://localhost:8000',
 });
 
-const createPrivateClient = (accessToken: string): AxiosInstance => {
-    return axios.create({
-        baseURL: `${BASE_URL}/user`,
-        headers: {
-            'Authorization': `Bearer ${accessToken}`
-        }
-    });
-};
+const privateClient = axios.create({ 
+    baseURL: `${BASE_URL}/user`, 
+});
 
-export const makeRequestWithAccessToken = async (
-    accessToken: string,
-    url: string,
-    options: ApiRequestOptions = {}
-): Promise<any> => {
-    try {
-        const privateClient = createPrivateClient(accessToken);
-        const { method = 'GET', data } = options;
-
-        const response = await privateClient({
-            method,
-            url,
-            data,
-        });
-
-        return response.data;
-    } catch (error) {
-        // Handle request errors (e.g., 401 Unauthorized, network issues)
-        console.error('Request error:', error);
-        // More specific error handling:
-        if (error.response && error.response.status === 401) {
-            // Handle 401 Unauthorized (token expired)
-            // Attempt to refresh the token here
-            // ... 
-        }
-        throw error; // Re-throw the error for handling in the calling function
-    }
-};
 
 
 //register User function
@@ -69,10 +36,8 @@ export const loginUser = async (loginData: { email: string; password: string }) 
 };
 
 export const refreshToken = async (decryptedRefreshToken: string) => {
-    const privateClient = createPrivateClient(decryptedRefreshToken); // Create private client with refresh token
-
     try {
-        const response = await privateClient.post('/api/refresh', {
+        const response = await privateClient.post('/refresh', {
             refreshToken: decryptedRefreshToken,
         });
         return response.data.accessToken;

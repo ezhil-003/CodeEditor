@@ -6,10 +6,6 @@ export interface ComponentChildren {
   children?: React.ReactNode;
 }
 
-export interface ApiRequestOptions {
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
-  data?: any;
-}
 
 export type Route = RouteObject;
 // type for route
@@ -36,4 +32,7 @@ export interface AuthenticationContextType {
   setToken: (token: string | null) => void;
   refreshToken: string | null;
   setRefreshToken: (refreshToken: string | null) => void;
+  isLoading: boolean,
+  handleLogout : () => void
+  isAuthenticated: boolean;
 }

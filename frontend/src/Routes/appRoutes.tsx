@@ -1,6 +1,4 @@
-import { Children, lazy } from "react";
-import { Navigate, useLocation } from 'react-router';
-import { useAuth } from "../Contexts/AuthContext.tsx";
+import { lazy } from "react";
 
 const Signin = lazy(() => import("../Pages/Signin.tsx"));
 const Signup = lazy(() => import("../Pages/Signup.tsx"));
@@ -29,19 +27,10 @@ export const publicRoutes = [
 
 export const UserRoutes = [
     {
-        path: '/dashboard',
+        path: '/user/dashboard',
         element: <Dashboard />,
         exact: true,
     },
 ]
 
-
-
- export function ProtectedRoutes({ children }: { children: React.ReactNode }) {
-    const { token } = useAuth();
-    if (!token) {
-        return <Navigate to="/signin" state={{ from: location }} replace />;
-    }
-    return children;
-}
 
