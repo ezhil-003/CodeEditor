@@ -11,8 +11,7 @@ const handleCryptoError = (error : Error) => {
 };
 
 const secretKey = await import.meta.env.VITE_ENC_KEY
-console.log("Secret key check",secretKey);
-console.log("secretKey length:", secretKey.length); 
+
 
 
 export const encryptRefreshToken = async (refreshToken: any) => {

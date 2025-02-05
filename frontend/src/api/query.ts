@@ -2,6 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { loginUser, registerUser, refreshToken } from "./api";
 import { useAuth } from "../Contexts/AuthContext";
 import { encryptRefreshToken } from "../utils/encryption";
+import { Navigate } from "react-router";
 
 
 export const useRegisterMutation = (navigate: any) => {

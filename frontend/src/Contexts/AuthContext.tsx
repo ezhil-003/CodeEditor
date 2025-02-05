@@ -2,6 +2,7 @@ import React, { createContext, useLayoutEffect, use, useState } from 'react';
 import { AuthenticationContextType } from '../@types/types';
 import { decryptRefreshToken } from '../utils/encryption';
 import { useRefreshTokenMutation } from '../api/query';
+// import { useNavigate } from 'react-router';
 
 export const AuthenticationContext = createContext<AuthenticationContextType | null>({
   token: null,
@@ -16,7 +17,8 @@ export const AuthenticationContext = createContext<AuthenticationContextType | n
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [token, setToken] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false); 
+  const [isLoading, setIsLoading] = useState(false);
+ 
 
   const { mutate: refreshTokenMutate } = useRefreshTokenMutation();
  
@@ -52,7 +54,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           handleLogout(); // Handle logout on decryption or refresh failure
         }
       } else {
-        
+        return 
       }
     };
   

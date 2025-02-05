@@ -10,7 +10,7 @@ const DocumentList = () => {
   ];
 
   return (
-    <div className="flex flex-row gap-6">
+    <div className="flex flex-row w-full gap-3 mt-2">
       {documents.map((doc, index) => (
         <DocumentCard
           key={index}
