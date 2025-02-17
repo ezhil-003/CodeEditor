@@ -1,8 +1,10 @@
 import { useMutation } from "@tanstack/react-query";
-import { loginUser, registerUser, refreshToken } from "./api";
+import { loginUser, registerUser, refreshToken, createProject } from "./api";
 import { useAuth } from "../Contexts/AuthContext";
-import { encryptRefreshToken } from "../utils/encryption";
+import { decryptRefreshToken, encryptRefreshToken } from "../utils/encryption";
 import { Navigate } from "react-router";
+
+
 
 
 export const useRegisterMutation = (navigate: any) => {
@@ -24,8 +26,8 @@ export const useRegisterMutation = (navigate: any) => {
 
 export const useLoginMutation = (navigate: any) => {
   const { setToken, setRefreshToken } = useAuth();
-  const handleSuccess = async (data  : any) => {
-     
+  const handleSuccess = async (data: any) => {
+
     const { token, refreshToken } = data;
     setToken(token);
     setRefreshToken(refreshToken);
@@ -50,7 +52,7 @@ export const useLoginMutation = (navigate: any) => {
 
 
 export const useRefreshTokenMutation = () => {
-  const handleSuccess = async(data: any)=>{
+  const handleSuccess = async (data: any) => {
     const { token, refreshToken } = data;
     const { setToken, setRefreshToken } = useAuth();
 
@@ -63,14 +65,38 @@ export const useRefreshTokenMutation = () => {
     localStorage.setItem("refreshToken", encrypted);
   }
   return useMutation({
-      mutationFn:refreshToken,
-      onSuccess: handleSuccess,
-      onError: (error) => {
-        // Handle refresh token error (e.g., display an error message, log the user out)
-        console.error('Refresh token error:', error);
-        // Optionally: localStorage.removeItem('refreshToken'); 
-        // Optionally: Invalidate any queries that depend on the access token
-      },
-    }
+    mutationFn: refreshToken,
+    onSuccess: handleSuccess,
+    onError: (error) => {
+      // Handle refresh token error (e.g., display an error message, log the user out)
+      console.error('Refresh token error:', error);
+      // Optionally: localStorage.removeItem('refreshToken'); 
+      // Optionally: Invalidate any queries that depend on the access token
+    },
+  }
   );
 };
+
+export const useCreateProject = (navigate: any) => {
+
+  const Authorization = () => {
+    const token = localStorage.getItem('accessToken');
+    return decryptRefreshToken(token); 
+  }
+  
+  const handleSuccess =(data: any) =>{
+    const { project_id } = data;
+    navigate(`/editor/${project_id}`)
+  }
+
+  return useMutation({
+    mutationFn: () => createProject(name, template, Authorization), // Pass Authorization to the API function
+    onSuccess: handleSuccess,
+    onError: (error: any) => {
+      console.error("Project creation error:", error);
+      
+    },
+  });
+};
+
+

@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { SignupForm } from '../@types/types';
+import { decryptRefreshToken } from '../utils/encryption';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL
 
@@ -10,6 +11,8 @@ const publicClient = axios.create({
 const privateClient = axios.create({ 
     baseURL: `${BASE_URL}/user`, 
 });
+
+
 
 
 
@@ -47,3 +50,23 @@ export const refreshToken = async (decryptedRefreshToken: string) => {
         throw error; // Re-throw the error for handling in the calling function
     }
 };
+
+export async function createProject(name: string, template: string, Authorization: string) {
+    try {
+        const response = await privateClient.post('/api/projects', {
+          name,
+          template,
+        }, { // Add the headers object as the third argument to post
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${Authorization}`,
+          },
+        });
+        return response.data;
+      } catch (error: any) {
+        const errorMessage = error?.response?.data?.message || error?.message || 'Failed to create project';
+        throw new Error(errorMessage);
+      }
+  }
+
+  

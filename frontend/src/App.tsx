@@ -14,6 +14,7 @@ import { ProtectedRoutes } from "./Routes/ProtectedRoutes.tsx";
 import { ThemeProvider } from './Contexts/ThemeContext.tsx';
 import { AuthProvider } from "./Contexts/AuthContext.tsx";
 import UserLayout from "./Layouts/UserLayout.tsx";
+import EditorLayout from "./Layouts/EditorLayout.tsx";
 
 function App() {
   const queryClient = new QueryClient();
@@ -37,6 +38,16 @@ function App() {
         </Suspense>
       ),
       children: UserRoutes,
+    },
+    {
+      path:"/user/editor/:project_id",
+      element:(
+        <Suspense fallback={<Loading />}>
+          <ProtectedRoutes>
+            <EditorLayout />
+          </ProtectedRoutes>
+        </Suspense>
+      ),
     },
     {
       path: "*",
