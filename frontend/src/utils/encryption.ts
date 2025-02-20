@@ -56,10 +56,17 @@ export const decryptRefreshToken = async (encryptedData: any) => {
   const [ivBase64, encryptedDataBase64] = encryptedData.split(':');
   const iv = Buffer.from(ivBase64, 'base64');
 
+  // Import the encryption key
+  const key = import.meta.env.VITE_ENC_KEY;
+  if (!key) {
+    console.error("decryptRefreshToken: Encryption key is missing.");
+    throw new Error("Encryption key is undefined.");
+  }
+
   // Import the encryption key (assuming it's securely obtained from the server)
   const importedKey = await subtleCrypto.importKey(
     'raw', // Key format
-    new TextEncoder().encode(import.meta.env.VITE_ENC_KEY), // Replace with actual key
+    new TextEncoder().encode(key), // Replace with actual key
     { name: 'AES-CBC', length: 256 }, // Algorithm and key length
     false, // Not extractable (prevents exporting the key)
     ['decrypt'] // Allowed usage
@@ -67,7 +74,7 @@ export const decryptRefreshToken = async (encryptedData: any) => {
 
   // Decrypt the refresh token
   const decryptedData = await subtleCrypto.decrypt(
-    { name: 'AES-CBC', iv: iv },
+    { name: 'AES-CBC', iv },
     importedKey,
     Buffer.from(encryptedDataBase64, 'base64')
   ).catch(handleCryptoError);

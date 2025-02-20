@@ -36,11 +36,11 @@ const DocumentCardGrid = () => {
             <Image
               src={doc.previewImage}
               alt={`Preview of ${doc.title}`}
-              fill
+            
               className="object-cover rounded-t-lg"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              placeholder="blur"
-              blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/wcAAgAB/1h8JAAAAABJRU5ErkJggg=="
+           
+              
             />
           </div>
 

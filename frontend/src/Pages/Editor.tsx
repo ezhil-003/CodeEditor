@@ -1,3 +1,4 @@
+// Editor.tsx
 import { useState } from 'react';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import { Tree } from 'react-arborist';

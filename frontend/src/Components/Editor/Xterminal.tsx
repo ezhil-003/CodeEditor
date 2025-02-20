@@ -1,4 +1,4 @@
-// src/components/XTerminal.tsx
+// src/Components/XTerminal.tsx
 import { useEffect, useRef } from 'react';
 import { Terminal } from '@xterm/xterm';
 import { WebLinksAddon } from '@xterm/addon-web-links';

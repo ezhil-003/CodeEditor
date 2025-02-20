@@ -2,7 +2,7 @@
 
 import DocumentCardGrid from "../Components/Dashboard/DocumentCardGrid";
 import DocumentList from "../Components/Dashboard/DocumentList";
-import StartNewDocument from "../Components/Dashboard/StartNewDocument";
+import StartNewProject from "../Components/Dashboard/StartNewProject";
 
 
 export default function Dashboard() {
@@ -10,7 +10,7 @@ export default function Dashboard() {
     <div className="p-8  h-screen">
       <div className="flex items-start flex-col gap-6 h-max mb-8">
         <section className="w-full h-max m-3 mb-2 flex flex-row gap-4">
-          <StartNewDocument />
+          <StartNewProject />
         </section>
         <section className="flex flex-col w-full h-full">
           <span className="p-2">

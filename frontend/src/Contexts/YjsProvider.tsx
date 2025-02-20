@@ -1,4 +1,4 @@
-// src/providers/YjsProvider.tsx
+// src/Contexts/YjsProvider.tsx
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import * as Y from 'yjs';
 import { WebsocketProvider } from 'y-websocket';

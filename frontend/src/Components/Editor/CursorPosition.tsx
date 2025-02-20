@@ -1,4 +1,4 @@
-// src/components/CursorPosition.tsx
+// src/Components/CursorPosition.tsx
 import { useYjs } from '../../Contexts/YjsProvider';
 import { useEffect, useState } from 'react';
 

@@ -51,22 +51,22 @@ export const refreshToken = async (decryptedRefreshToken: string) => {
     }
 };
 
-export async function createProject(name: string, template: string, Authorization: string) {
+export async function createProject(name: string, template: string, token: string) {
     try {
-        const response = await privateClient.post('/api/projects', {
-          name,
-          template,
-        }, { // Add the headers object as the third argument to post
+      const response = await privateClient.post(
+        '/createProject',
+        { name, template },
+        {
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${Authorization}`,
+            Authorization: `Bearer ${token}`,
           },
-        });
-        return response.data;
-      } catch (error: any) {
-        const errorMessage = error?.response?.data?.message || error?.message || 'Failed to create project';
-        throw new Error(errorMessage);
-      }
+        }
+      );
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error?.response?.data?.message || error?.message || 'Failed to create project');
+    }
   }
 
   

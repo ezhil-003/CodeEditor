@@ -1,4 +1,4 @@
-// src/components/MonacoEditor.tsx
+// src/Components/MonacoEditor.tsx
 import { useRef, useEffect } from 'react';
 import Editor, { Monaco, useMonaco } from '@monaco-editor/react';
 import { useYjs } from '../../Contexts/YjsProvider';
