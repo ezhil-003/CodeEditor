@@ -6,7 +6,7 @@ import { Button, Input, Modal, ModalBody, ModalContent, ModalHeader, ModalFooter
 const StartNewProject = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [name, setName] = useState("");
-  const [template, setTemplate] = useState("default");
+  const [template, setTemplate] = useState("vite-react");
   const createProjectMutation = useCreateProject();
 
   const handleOpenModal = () => setIsOpen(true);
@@ -25,7 +25,7 @@ const StartNewProject = () => {
     <>
       <button className="flex flex-col items-center justify-center border border-gray-300 rounded-lg shadow-md p-4 w-40 h-40 hover:shadow-lg transition cursor-pointer"
         onClick={handleOpenModal}
-        disabled={createProjectMutation.isLoading}
+        disabled={createProjectMutation.isPending}
       >
         <div className="flex items-center justify-center w-20 h-20 bg-blue-500 rounded-full text-white">
           <svg
@@ -61,8 +61,8 @@ const StartNewProject = () => {
             <Button color="danger" variant="light" onPress={() => setIsOpen(false)}>
               Cancel
             </Button>
-            <Button color="primary" onPress={handleCreateProject} isLoading={createProjectMutation.isLoading}>
-              {createProjectMutation.isLoading ? "Creating..." : "Confirm"}
+            <Button color="primary" onPress={handleCreateProject} isLoading={createProjectMutation.isPending}>
+              {createProjectMutation.isPending ? "Creating..." : "Confirm"}
             </Button>
           </ModalFooter>
         </ModalContent>

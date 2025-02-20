@@ -1,3 +1,4 @@
+// src/App.tsx
 import { Suspense } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router";
 import {
@@ -17,7 +18,7 @@ import UserLayout from "./Layouts/UserLayout.tsx";
 import EditorLayout from "./Layouts/EditorLayout.tsx";
 
 function App() {
-  const queryClient = new QueryClient();
+  
   const router = createBrowserRouter([
     {
       path: "/",
@@ -38,6 +39,7 @@ function App() {
         </Suspense>
       ),
       children: UserRoutes,
+      
     },
     {
       path:"/user/editor/:project_id",
@@ -60,15 +62,11 @@ function App() {
   ]);
 
   return (
-    <>
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider>
-          <AuthProvider>
-            <RouterProvider router={router} />
-            <ReactQueryDevtools initialIsOpen={false} />
-          </AuthProvider>
-        </ThemeProvider>
-      </QueryClientProvider>
+    <>    
+      <ThemeProvider> 
+        <RouterProvider router={router} />
+        <ReactQueryDevtools initialIsOpen={false} />    
+      </ThemeProvider>
     </>
   );
 }

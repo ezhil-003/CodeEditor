@@ -1,3 +1,4 @@
+// src/utils/encryption.ts
 import { Buffer } from "buffer";
 
 const subtleCrypto = window.crypto.subtle; // Access the SubtleCrypto API
@@ -10,7 +11,8 @@ const handleCryptoError = (error : Error) => {
   throw new Error('Encryption or decryption failed'); // Re-throw for caller handling
 };
 
-const secretKey = await import.meta.env.VITE_ENC_KEY
+const secretKey = import.meta.env.VITE_ENC_KEY;
+if (!secretKey) throw new Error("Encryption key is missing.");
 
 
 
@@ -24,18 +26,10 @@ export const encryptRefreshToken = async (refreshToken: any) => {
   const importedKey = await subtleCrypto.importKey(
     'raw', // Key format
     new TextEncoder().encode(secretKey), // Replace with actual key
-    { name: 'AES-CBC', length: 128 }, // Algorithm and key length
+    { name: 'AES-CBC', length: 256 }, // Algorithm and key length
     false, // Not extractable (prevents exporting the key)
     ['encrypt'] // Allowed usage
   ).catch(handleCryptoError);
-
-  if (importedKey) { 
-    console.log("importedKey algorithm:", importedKey.algorithm);
-    console.log("importedKey usage:", importedKey.usages);
-    console.log("importedKey extractable:", importedKey.extractable);
-  } else {
-    console.error("Error importing key.");
-  }
 
   // Encrypt the refresh token
   const encryptedData = await subtleCrypto.encrypt(
@@ -54,7 +48,7 @@ export const encryptRefreshToken = async (refreshToken: any) => {
 export const decryptRefreshToken = async (encryptedData: any) => {
   // Extract the IV from the stored encrypted data
   const [ivBase64, encryptedDataBase64] = encryptedData.split(':');
-  const iv = Buffer.from(ivBase64, 'base64');
+  const iv = new Uint8Array(Buffer.from(ivBase64, 'base64'));
 
   // Import the encryption key
   const key = import.meta.env.VITE_ENC_KEY;

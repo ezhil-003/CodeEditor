@@ -1,60 +1,69 @@
-import { Card, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Image } from "@nextui-org/react";
-// import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
+import {
+  Card,
+  CardHeader,
+  CardBody,
+  Image,
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
+  Skeleton,
+} from "@nextui-org/react";
+import { useEffect } from "react";
+import { useRecentProjects } from "../../api/query";
+import { useNavigate } from "react-router";
 
 const DocumentCardGrid = () => {
-  const documents = [
-    {
-      id: 1,
-      title: "Project Proposal",
-      lastOpened: "2024-02-15",
-      previewImage: "/tile2.jpg"
-    },
-    {
-      id: 2,
-      title: "Meeting Notes",
-      lastOpened: "2024-02-14",
-      previewImage: "/tile2.jpg"
-    },
-    {
-      id: 3,
-      title: "Technical Specs",
-      lastOpened: "2024-02-13",
-      previewImage: "/tile2.jpg"
-    },
-    // Add more documents
-  ];
+  const { data: projects, isLoading, error, refetch } = useRecentProjects();
+  // Optional: Trigger refetch on mount (not needed unless required)
+  const navigate = useNavigate();
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
+  const handleCardPress = (projectId: string) => {
+    if (!isLoading) {
+      navigate(`/editor/${projectId}`)
+    }
+  }
+
+  if (error) {
+    return <p className="text-red-500 p-4">Error fetching projects.</p>;
+  }
 
   return (
     <div className="flex flex-row gap-4 p-6 flex-wrap">
-      {documents.map((doc) => (
+      {(isLoading ? [...Array(6)] : projects).map((project: any, index: number) => (
         <Card
-          key={doc.id}
-          className="hover:shadow-lg transition-shadow duration-300 border border-gray-200 w-[300px] p-2 flex-shrink-0"
+          key={project?.id || index}
+          isPressable={!isLoading}
+          onPress={() => handleCardPress(project.id)}
+          className="hover:shadow-xl transition-shadow duration-300 border border-gray-300 w-[300px] flex-shrink-0"
         >
-          {/* Document Preview Area */}
-          <div className="h-48 relative p-4 bg-gray-50">
-            <Image
-              src={doc.previewImage}
-              alt={`Preview of ${doc.title}`}
-            
-              className="object-cover rounded-t-lg"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-           
-              
-            />
-          </div>
+          {/* Card Header with Image Skeleton */}
+          <CardHeader className="relative p-0 h-48">
+            <Skeleton className="w-full h-full rounded-t-lg" isLoaded={isLoading ? false : true}>
+              <Image
+                src={"/tile2.jpg"}
+                alt={`Preview of ${project?.name}`}
+                className="object-cover w-full h-full rounded-t-lg"
+              />
+            </Skeleton>
+          </CardHeader>
 
-          {/* Footer */}
-          <div className="p-4 bg-gray-800 rounded-b-lg">
+          {/* Card Body */}
+          <CardBody className="p-4 bg-gray-800 rounded-b-lg">
             <div className="flex justify-between items-center">
-              {/* Document Details */}
+              {/* Project Details */}
               <div className="flex-1">
-                <h3 className="font-semibold text-white truncate">{doc.title}</h3>
-                <p className="text-sm text-gray-300 mt-1">
-                  Last opened: {new Date(doc.lastOpened).toLocaleDateString()}
-                </p>
+                <Skeleton className="h-4 w-3/4 mb-2">
+                  <h3 className="font-semibold text-white truncate">{project?.name}</h3>
+                </Skeleton>
+                <Skeleton>
+                  <p className="text-sm text-gray-300 mt-1">
+                    Last opened: {new Date(project?.createdAt).toLocaleDateString()}
+                  </p>
+                </Skeleton>
               </div>
-
               {/* Three-dot Menu */}
               <Dropdown>
                 <DropdownTrigger>
@@ -84,7 +93,7 @@ const DocumentCardGrid = () => {
                 </DropdownMenu>
               </Dropdown>
             </div>
-          </div>
+          </CardBody>
         </Card>
       ))}
     </div>
