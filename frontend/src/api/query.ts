@@ -2,7 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { loginUser, registerUser, refreshToken, createProject } from "./api";
 import { useAuth } from "../Contexts/AuthContext";
 import { decryptRefreshToken, encryptRefreshToken } from "../utils/encryption";
-import { Navigate } from "react-router";
+import { useNavigate } from "react-router";
 
 
 
@@ -77,24 +77,32 @@ export const useRefreshTokenMutation = () => {
   );
 };
 
-export const useCreateProject = (navigate: any) => {
+export const useCreateProject = () => {
+  const navigate = useNavigate();
 
-  const Authorization = () => {
-    const token = localStorage.getItem('accessToken');
-    return decryptRefreshToken(token); 
-  }
-  
-  const handleSuccess =(data: any) =>{
+  const getAuthorization = () => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      console.error("useCreateProject: No access token found.");
+      return null;
+    }
+    return token;
+  };
+
+  const handleSuccess = (data: any) => {
     const { project_id } = data;
-    navigate(`/editor/${project_id}`)
-  }
+    navigate(`/editor/${project_id}`);
+  };
 
   return useMutation({
-    mutationFn: () => createProject(name, template, Authorization), // Pass Authorization to the API function
+    mutationFn: async ({ name, template }: { name: string; template: string }) => {
+      const authToken = await getAuthorization();
+      if (!authToken) throw new Error("Authorization token is missing.");
+      return createProject(name, template, authToken);
+    },
     onSuccess: handleSuccess,
-    onError: (error: any) => {
-      console.error("Project creation error:", error);
-      
+    onError: (error) => {
+      console.error('Project creation error:', error);
     },
   });
 };
