@@ -1,34 +1,30 @@
-import React, { createContext, useLayoutEffect, use, useState } from 'react';
+import React, { createContext, useContext, useEffect, useLayoutEffect, useState } from 'react';
 import { AuthenticationContextType } from '../@types/types';
 import { decryptRefreshToken } from '../utils/encryption';
-import { useRefreshTokenMutation } from '../api/query';
-// import { useNavigate } from 'react-router';
+import { refreshAccessToken } from '../api/api';
+import { useMutation } from '@tanstack/react-query';
 
-export const AuthenticationContext = createContext<AuthenticationContextType | null>({
-  token: null,
-  setToken: () => { },
-  refreshToken: null,
-  setRefreshToken: () => { },
-  isLoading: false,
-  handleLogout: () => {},
-  isAuthenticated: false,
-});
+export const AuthenticationContext = createContext<AuthenticationContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [token, setToken] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
- 
-
-  const { mutate: refreshTokenMutate } = useRefreshTokenMutation();
- 
-  const refreshAccessToken = async () => {
-    if (!refreshToken) return;
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Use raw mutation without context dependency
+  const { mutateAsync: refreshTokenMutate } = useMutation({
+    mutationFn: refreshAccessToken
+  });
+  const refreshAccessTokenHandler = async (currentRefreshToken: string) => {
     try {
-      refreshTokenMutate(refreshToken);
+      const newAccessToken = await refreshTokenMutate(currentRefreshToken);
+      setToken(newAccessToken);
+      localStorage.setItem("accessToken", newAccessToken);
+      return newAccessToken;
     } catch (error) {
       console.error("Error refreshing access token:", error);
-      handleLogout(); // Logout on refresh token failure
+      handleLogout();
+      throw error;
     } finally {
       setIsLoading(false);
     }
@@ -41,37 +37,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     localStorage.removeItem("refreshToken");
   };
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const initializeAuth = async () => {
       const storedRefreshToken = localStorage.getItem("refreshToken");
       if (storedRefreshToken) {
         try {
-          const decryptedToken = await decryptRefreshToken(storedRefreshToken); // Await the decryption
-          setRefreshToken(decryptedToken); // Set the decrypted token
-          await refreshAccessToken(); // Ensure the token refresh happens sequentially
+          const decryptedToken = await decryptRefreshToken(storedRefreshToken);
+          setRefreshToken(decryptedToken);
+          await refreshAccessTokenHandler(decryptedToken);
         } catch (error) {
           console.error("Error decrypting refresh token:", error);
-          handleLogout(); // Handle logout on decryption or refresh failure
+          handleLogout();
         }
       } else {
-        return 
+        setIsLoading(false);
       }
     };
-  
-    initializeAuth(); // Call the async function
+    initializeAuth();
   }, []);
 
   const isAuthenticated = !!token;
 
   return (
-    <AuthenticationContext value={{ token, setToken, refreshToken, setRefreshToken, isLoading, handleLogout, isAuthenticated }}>
+    <AuthenticationContext.Provider value={{ token, setToken, refreshToken, setRefreshToken, isLoading, handleLogout, isAuthenticated }}>
       {!isLoading && children}
-    </AuthenticationContext>
+    </AuthenticationContext.Provider>
   );
-}
+};
 
 export const useAuth = () => {
-  const context = use(AuthenticationContext);
+  const context = useContext(AuthenticationContext);
   if (context === null) {
     throw new Error('useAuth must be used within an AuthProvider');
   }

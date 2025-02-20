@@ -45,7 +45,6 @@ model Project {
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 }
-
 model File {
   id        String   @id @default(uuid())
   name      String
@@ -56,6 +55,8 @@ model File {
   folder    Folder?  @relation(fields: [folderId], references: [id])
   folderId  String?
   changes   Change[]
+  mimeType  String   // ✅ Added mimeType field
+  size      Int      // ✅ Added size field to store file size in bytes
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

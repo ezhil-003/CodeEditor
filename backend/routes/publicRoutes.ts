@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { PrismaClient } from '@prisma/client';
 import type { Context } from 'hono';
 import { Hono } from "hono";
-import { decode, sign, verify } from 'hono/jwt'
+import { sign } from 'hono/jwt'
 import { randomUUIDv7 } from "bun";
 
 

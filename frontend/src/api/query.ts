@@ -1,11 +1,9 @@
-import { useMutation } from "@tanstack/react-query";
-import { loginUser, registerUser, refreshToken, createProject } from "./api";
+// src/api/query.ts
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { loginUser, registerUser, createProject, getRecentProjects, refreshAccessToken } from "./api";
 import { useAuth } from "../Contexts/AuthContext";
-import { decryptRefreshToken, encryptRefreshToken } from "../utils/encryption";
+import { encryptRefreshToken } from "../utils/encryption";
 import { useNavigate } from "react-router";
-
-
-
 
 export const useRegisterMutation = (navigate: any) => {
   const handleSuccess = () => {
@@ -51,58 +49,52 @@ export const useLoginMutation = (navigate: any) => {
 };
 
 
+
 export const useRefreshTokenMutation = () => {
-  const handleSuccess = async (data: any) => {
-    const { token, refreshToken } = data;
-    const { setToken, setRefreshToken } = useAuth();
-
-    setToken(token);
-    setRefreshToken(refreshToken);
-
-    const encrypted = await encryptRefreshToken(refreshToken)
-    // Store tokens in localStorage (with encryption for refreshToken)
-    localStorage.setItem("accessToken", token);
-    localStorage.setItem("refreshToken", encrypted);
-  }
+  const auth = useAuth(); // ✅ Access context here
   return useMutation({
-    mutationFn: refreshToken,
-    onSuccess: handleSuccess,
-    onError: (error) => {
-      // Handle refresh token error (e.g., display an error message, log the user out)
-      console.error('Refresh token error:', error);
-      // Optionally: localStorage.removeItem('refreshToken'); 
-      // Optionally: Invalidate any queries that depend on the access token
+    mutationFn: refreshAccessToken, // ✅ Directly use the function
+    onSuccess: (newAccessToken) => {
+      if (!auth) {
+        console.error("Auth context is not available.");
+        return;
+      }
+      auth.setToken(newAccessToken); // ✅ Now using context safely
+      localStorage.setItem("accessToken", newAccessToken);
     },
-  }
-  );
+    onError: (error) => {
+      console.error("Token refresh failed:", error);
+    },
+  });
 };
 
 export const useCreateProject = () => {
   const navigate = useNavigate();
-
-  const getAuthorization = () => {
-    const token = localStorage.getItem("accessToken");
-    if (!token) {
-      console.error("useCreateProject: No access token found.");
-      return null;
-    }
-    return token;
-  };
-
   const handleSuccess = (data: any) => {
-    const { project_id } = data;
-    navigate(`/editor/${project_id}`);
+    const { projectId } = data;
+    navigate(`/editor/${projectId}`);
   };
 
   return useMutation({
     mutationFn: async ({ name, template }: { name: string; template: string }) => {
-      const authToken = await getAuthorization();
-      if (!authToken) throw new Error("Authorization token is missing.");
-      return createProject(name, template, authToken);
+      return createProject(name, template);
     },
     onSuccess: handleSuccess,
     onError: (error) => {
       console.error('Project creation error:', error);
+    },
+  });
+};
+
+export const useRecentProjects = () => {
+  return useQuery({
+    queryKey: ["recentProjects"],
+    queryFn: getRecentProjects,
+    staleTime: 1000 * 60 * 5, // Cache data for 5 minutes
+    retry: 3, // Retry failed requests up to 3 times
+    refetchOnWindowFocus: false, // Prevent unnecessary refetching when switching tabs
+    onError: (error : Error) => {
+      console.error("Error fetching recent projects:", error);
     },
   });
 };
